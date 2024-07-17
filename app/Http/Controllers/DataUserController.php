@@ -3,66 +3,82 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Payment;
+use App\Models\DataUser;
 
-class PaymentController extends Controller
+class DataUserController extends Controller
 {
     public function index(Request $request)
     {
-        $payments = Payment::orderBy('created_at', 'DESC')->get();
+        $query = $request->input('search');
+        $datausers = DataUser::when($query, function ($queryBuilder) use ($query) {
+            return $queryBuilder->where('Nama', 'like', "%{$query}%")
+                                ->orWhere('Nama_Alm', 'like', "%{$query}%")
+                                ->orWhere('Alamat', 'like', "%{$query}%");
+        })->orderBy('created_at', 'DESC')->get();
 
-        return view('admin.payments.index', compact('payments'));
+        return view('datausers.index', compact('datausers'));
     }
 
     public function create()
     {
-        return view('admin.payments.create');
+        return view('datausers.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric',
-            'payment_date' => 'required|date',
+            'Nama' => 'required|string|max:255',
+            'Nama_Alm' => 'required|string|max:255',
+            'Alamat' => 'required|string|max:255',
+            'No_ktp' => 'required|string|max:255',
+            'No_Kk' => 'required|string|max:255',
+            'No_telepon' => 'required|string|max:255',
+            'Email' => 'required|string|max:255',
         ]);
 
-        Payment::create($request->all());
+        DataUser::create($request->all());
 
-        return redirect()->route('admin.payments.index')->with('success', 'Payment created successfully.');
+        return redirect()->route('datausers.index')->with('success', 'DataUser created successfully.');
     }
 
-    public function show($id)
+    public function show(string $id)
     {
-        $payment = Payment::findOrFail($id);
-        return view('admin.payments.show', compact('payment'));
+        $datauser = DataUser::findOrFail($id);
+
+        return view('datausers.show', compact('datauser'));
     }
 
-    public function edit($id)
+    public function edit(string $id)
     {
-        $payment = Payment::findOrFail($id);
-        return view('admin.payments.edit', compact('payment'));
+        $datauser = DataUser::findOrFail($id);
+
+        return view('datausers.edit', compact('datauser'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, string $id)
     {
+        $datauser = DataUser::findOrFail($id);
+
         $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'amount' => 'required|numeric',
-            'payment_date' => 'required|date',
+            'Nama' => 'required|string|max:255',
+            'Nama_Alm' => 'required|string|max:255',
+            'Alamat' => 'required|string|max:255',
+            'No_ktp' => 'required|string|max:255',
+            'No_Kk' => 'required|string|max:255',
+            'No_telepon' => 'required|string|max:255',
+            'Email' => 'required|string|max:255',
         ]);
 
-        $payment = Payment::findOrFail($id);
-        $payment->update($request->all());
+        $datauser->update($request->all());
 
-        return redirect()->route('admin.payments.index')->with('success', 'Payment updated successfully.');
+        return redirect()->route('datausers.index')->with('success', 'DataUser updated successfully.');
     }
 
-    public function destroy($id)
+    public function destroy(string $id)
     {
-        $payment = Payment::findOrFail($id);
-        $payment->delete();
+        $datauser = DataUser::findOrFail($id);
+        $datauser->delete();
 
-        return redirect()->route('admin.payments.index')->with('success', 'Payment deleted successfully.');
+        return redirect()->route('datausers.index')->with('success', 'DataUser deleted successfully.');
     }
 }
